@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% block content %}
+  <article class="border-2 border-gray-600 px-2 py-2">
+    <h2 class="text-2xl font-bold mb-2"> Oops... {{ status_code }} Error!!</h2>
+    <p class="text-base mb-4"> {{ message }}</p>
+  </article>
+{% endblock content %}

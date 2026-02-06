@@ -1,0 +1,9 @@
+{
+    "scripts": {
+    "build": "npx @tailwindcss/cli -i ./input.css -o ../static/css/output.css",
+    "watch": "npx @tailwindcss/cli -i ./input.css -o ../static/css/output.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18"
+  }
+}

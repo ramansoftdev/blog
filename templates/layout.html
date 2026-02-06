@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href='{{ url_for("static",path="css/output.css") }}'>
+    <title>
+      {% if title %}
+      FastAPI Blog - {{ title }}
+      {% else %}
+      FastAPI Blog
+      {% endif %}
+    </title>
+
+    <title>Home</title>
+</head>
+<body class="bg-white text-gray-950 font-sans text-base leading-relaxed antialiased">
+  <nav class="bg-slate-700 sticky top-0 z-50">
+    <div class="flex justify-end items-center py-1.5 mb-1 gap-2">
+      <button class="bg-blue-300 border-2 rounded px-1.5 py-1">login</button>
+      <button class="bg-blue-300 border-2 rounded px-1.5 py-1">register</button>
+      <button class="bg-blue-300 border-2 rounded px-1.5 py-1">Theme</button>
+     </div>
+    </nav>
+  {% block content %}
+  {% endblock content %}
+</body>
+</html>

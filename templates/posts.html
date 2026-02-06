@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+  {% for post in posts %}
+  <article class="border-2 border-gray-600 px-2 py-2">
+    <h2 class="text-2xl font-bold mb-2 hover:underline hover:cursor-pointer hover:text-gray-500"> 
+      <a href="{{ url_for("get_post_html",post_id=post.id) }}">
+        {{ post.title }}
+      </a> 
+    </h2>
+    <p class="text-base mb-4"> {{ post.content }}</p>
+  </article>
+  {% endfor %}
+{% endblock content %}
