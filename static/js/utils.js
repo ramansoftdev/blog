@@ -1,3 +1,5 @@
+import { getUser, getToken } from './auth.js';
+
 export function openModal(modalId) {
   document.getElementById(modalId).classList.remove('hidden');
 }
@@ -21,20 +23,34 @@ export async function submitPost(e) {
   e.preventDefault();
   const title = document.getElementById('post-title').value.trim();
   const content = document.getElementById('post-content').value.trim();
-  const userId = document.getElementById('post-user-id').value;
   const errorEl = document.getElementById('post-error');
-  if (!title || !content || !userId) {
+
+  if (!title || !content) {
     errorEl.textContent = 'All fields are required.';
     errorEl.classList.remove('hidden');
     return;
   }
+
+  const user = await getUser();
+  if (!user) {
+    window.location.href = '/login';
+    return;
+  }
+
   try {
     const res = await fetch('/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, content, user_id: Number(userId) })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify({ title, content })
     });
     if (!res.ok) {
+      if (res.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       const data = await res.json();
       errorEl.textContent = getErrorMessage(data.detail);
       errorEl.classList.remove('hidden');

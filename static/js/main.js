@@ -4,6 +4,7 @@ import { logout, getUser } from './auth.js';
 async function update_auth_ui() {
   const authButtons = document.getElementById('auth-nav-buttons');
   const guestButtons = document.getElementById('guest-nav-buttons');
+  const usernameDisplay = document.getElementById('username-display');
   const user = await getUser();
 
   if (user) {
@@ -12,6 +13,11 @@ async function update_auth_ui() {
     authButtons.classList.add('flex');
     guestButtons.classList.add('hidden');
     guestButtons.classList.remove('flex');
+
+    // Display username
+    if (usernameDisplay) {
+      usernameDisplay.textContent = `Welcome, ${user.username}`;
+    }
   } else {
     // Hide auth buttons, show guest buttons
     authButtons.classList.add('hidden');
@@ -35,7 +41,6 @@ if (logoutBtn) {
 }
 
 // Update UI on page load
-update_auth_ui();
 
 const newPostBtn = document.getElementById('new-post-btn');
 if (newPostBtn) {
@@ -45,3 +50,5 @@ if (newPostBtn) {
   document.getElementById('new-post-modal-cancel').onclick = () => closeModal('new-post-modal');
   document.getElementById('new-post-form').onsubmit = submitPost;
 }
+
+update_auth_ui();
