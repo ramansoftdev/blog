@@ -7,12 +7,18 @@ class UserBase(BaseModel):
   email:EmailStr = Field(max_length=120)
 
 class UserCreate(UserBase):
-  pass
-
-class UserResponse(UserBase):
+  password:str=Field(min_lenth=8)
+class UserPublic(BaseModel):
   model_config = ConfigDict(from_attributes=True)
-
   id:int
+  username:str
+
+class UserPrivate(UserPublic):
+  email:EmailStr
+
+class Token(BaseModel):
+  access_token:str
+  token_type:str
 
 class UserUpdate(BaseModel):
   username:str|None =Field(default=None, min_length=1, max_length=50)
@@ -38,4 +44,4 @@ class PostResponse(PostBase):
   id: int
   user_id:int
   date_posted:datetime
-  author:UserResponse
+  author:UserPublic

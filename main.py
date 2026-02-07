@@ -36,7 +36,7 @@ async def home(request:Request):
     return templates.TemplateResponse(
     request,
     "default.html",{
-    "greeting":"Welcome to the samvaad blogs",
+    "greeting":"Welcome to the vaada blogs",
     "message": " checkout our platform for more blogs"
     },
     status_code = status.HTTP_200_OK,
@@ -44,7 +44,7 @@ async def home(request:Request):
 
 @app.get("/posts", include_in_schema=False)
 async def get_posts_html(request:Request, db:Annotated[AsyncSession, Depends(get_db)] ):
-    result = await db.execute(select(models.Post))
+    result = await db.execute(select(models.Post).order_by(models.Post.date_posted.desc()))
     posts = result.scalars().all()
     return templates.TemplateResponse(request,"posts.html", 
         {
@@ -79,7 +79,7 @@ async def get_user_posts_html(request:Request, user_id:int,db:Annotated[AsyncSes
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
     
-    result = await db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    result = await db.execute(select(models.Post).order_by(models.Post.date_posted.desc()).where(models.Post.user_id == user_id))
     posts = result.scalars().all()
     return templates.TemplateResponse(request,"user_posts.html",
     {
@@ -91,6 +91,26 @@ async def get_user_posts_html(request:Request, user_id:int,db:Annotated[AsyncSes
 
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
+
+#***************************************************login/register*********************************************************
+
+@app.get("/register",include_in_schema=False)
+async def register_page(request:Request):
+    return templates.TemplateResponse(
+        request,
+        "register.html",
+        {"title":"Register"}
+    )
+
+@app.get("/login",include_in_schema=False)
+async def login_page(request:Request):
+    return templates.TemplateResponse(
+        request,
+        "login.html",
+        {"title":"login"}
+    )
+
+
 
 
 #***************************************************exception handler*********************************************************

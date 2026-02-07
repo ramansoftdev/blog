@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="flex justify-center items-center mt-16">
+    <div class="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded p-6 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Login</h2>
+      <form id="login-form" class="space-y-3">
+        <div>
+          <label for="login-email" class="block mb-1">Email</label>
+          <input id="login-email" type="email" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded px-2 py-1">
+        </div>
+        <div>
+          <label for="login-password" class="block mb-1">Password</label>
+          <input id="login-password" type="password" required class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded px-2 py-1">
+        </div>
+        <p id="login-error" data-error class="text-red-500 text-sm hidden"></p>
+        <div class="flex justify-end mt-4">
+          <button type="submit" class="px-3 py-1 rounded bg-blue-500 text-white cursor-pointer">Login</button>
+        </div>
+        <div class="text-center mt-2">
+          <a href="/register" class="text-blue-500 hover:underline text-sm">Don't have an account? Register here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { setToken } from '{{ url_for("static", path="js/auth.js") }}';
+    import { getErrorMessage } from '{{ url_for("static", path="js/utils.js") }}';
+
+    document.getElementById('login-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const errorEl = document.getElementById('login-error');
+
+      if (!email || !password) {
+        errorEl.textContent = 'All fields are required.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        // OAuth2PasswordRequestForm expects form data with 'username' and 'password' fields
+        const formData = new URLSearchParams();
+        formData.append('username', email); // Using email as username
+        formData.append('password', password);
+
+        const res = await fetch('/api/users/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          errorEl.textContent = getErrorMessage(data.detail);
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        const data = await res.json();
+
+        // Store the access token in localStorage
+        setToken(data.access_token);
+
+        // Redirect to home page
+        window.location.href = '/';
+
+      } catch {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.remove('hidden');
+      }
+    };
+  </script>
+{% endblock content %}

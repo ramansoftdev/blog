@@ -12,3 +12,12 @@ wheels/
 
 #node dependencies
 node_modules/
+
+
+
+### env config
+.env
+
+
+### db
+blog.db
