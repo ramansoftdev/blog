@@ -2,12 +2,14 @@
 from typing import Annotated
 from contextlib import asynccontextmanager
 from fastapi.exception_handlers import http_exception_handler,request_validation_exception_handler
+import time
 
 from fastapi import FastAPI, Request, HTTPException, status, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 from sqlalchemy import select
@@ -29,6 +31,54 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static",StaticFiles(directory="static"),name="static")
 app.mount("/media",StaticFiles(directory="media"), name="media")
 templates = Jinja2Templates(directory="templates")
+
+#***************************************************middleware*********************************************************
+
+class RequestTimingMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to measure request processing time.
+    Adds X-Process-Time header to all responses.
+    """
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+
+        # Process the request
+        response = await call_next(request)
+
+        # Calculate processing time
+        process_time = time.time() - start_time
+
+        # Add custom header with processing time
+        response.headers["X-Process-Time"] = f"{process_time:.4f}s"
+
+        # Optional: Log the request for monitoring
+        print(f"{request.method} {request.url.path} - {process_time:.4f}s - {response.status_code}")
+
+        return response
+
+# Register middleware
+app.add_middleware(RequestTimingMiddleware)
+
+# Function-based logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Simple function-based middleware to log all incoming requests.
+    """
+    # Get client IP
+    client_host = request.client.host if request.client else "unknown"
+
+    # Log incoming request
+    print(f"📥 Incoming: {request.method} {request.url.path} from {client_host}")
+
+    # Process request
+    response = await call_next(request)
+
+    # Log response status
+    status_emoji = "✅" if response.status_code < 400 else "❌"
+    print(f"{status_emoji} Response: {response.status_code} for {request.method} {request.url.path}")
+
+    return response
 
 #***************************************************html posts pages*********************************************************
 @app.get("/", include_in_schema=False)
